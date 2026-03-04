@@ -17,8 +17,8 @@ import torch
 from contextlib import nullcontext
 from torch import optim
 from torch.utils.data import DataLoader
-from model.config import SpongeBobConfig
-from model.model_spongebob_pro import SpongeBobForCausalLM
+from model.config import BottleZeroConfig
+from model.model_BottleZero_pro import BottleZeroForCausalLM
 from dataset.pretrain_dataset import PretrainDataset
 from utils import get_lr, Logger, SkipBatchSampler
 from benchmark.evaluator import run_benchmark
@@ -95,7 +95,7 @@ def train_epoch(epoch, loader, iters, start_step=0, swanlab=None, total_steps=No
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="SpongeBob Pretraining (Single GPU)")
+    parser = argparse.ArgumentParser(description="BottleZero Pretraining (Single GPU)")
     parser.add_argument("--save_dir", type=str, default="../pretrain_out", help="模型保存根目录")
     parser.add_argument('--save_weight', default='pretrain', type=str, help="保存权重的前缀名")
     parser.add_argument("--epochs", type=int, default=2, help="训练轮数")
@@ -115,14 +115,14 @@ if __name__ == "__main__":
     parser.add_argument('--from_weight', default='none', type=str, help="基于哪个权重训练，为none则从头开始")
     parser.add_argument('--from_resume', default=0, type=int, choices=[0, 1], help="是否自动检测&续训（0=否，1=是）")
     parser.add_argument("--use_swanlab", type=int, default=1, choices=[0, 1], help="是否使用swanlab（0=否，1=是）")
-    parser.add_argument("--swanlab_project", type=str, default="SpongeBob-Pretrain", help="swanlab项目名")
+    parser.add_argument("--swanlab_project", type=str, default="BottleZero-Pretrain", help="swanlab项目名")
     parser.add_argument("--use_compile", default=1, type=int, choices=[0, 1], help="是否使用torch.compile加速（0=否，1=是）")
     parser.add_argument("--eval_bench", default=1, type=int, choices=[0, 1], help="是否评测benchmark（0=否，1=是）")
     parser.add_argument("--eval_interval", type=int, default=100, help="评测间隔步数")
     args = parser.parse_args()
 
     # ========== 1. 配置目录、模型参数、检查 ckp ==========
-    lm_config = SpongeBobConfig(hidden_size=args.hidden_size, num_hidden_layers=args.num_hidden_layers)
+    lm_config = BottleZeroConfig(hidden_size=args.hidden_size, num_hidden_layers=args.num_hidden_layers)
     run_name = f"h{args.hidden_size}_l{args.num_hidden_layers}_bs{args.batch_size}_lr{args.learning_rate}"
     full_save_dir = os.path.join(args.save_dir, run_name)
     os.makedirs(full_save_dir, exist_ok=True)
@@ -159,10 +159,10 @@ if __name__ == "__main__":
     # ========== 5. 模型、数据、优化器 ==========
     if args.from_weight != 'none' and os.path.exists(args.from_weight):
         Logger(f'Loading model from {args.from_weight}')
-        model = SpongeBobForCausalLM.from_pretrained(args.from_weight)
+        model = BottleZeroForCausalLM.from_pretrained(args.from_weight)
     else:
         Logger(f'Creating new model: hidden_size={args.hidden_size}, num_layers={args.num_hidden_layers}')
-        model = SpongeBobForCausalLM(lm_config)
+        model = BottleZeroForCausalLM(lm_config)
     model = model.to(args.device)
     Logger(f'Model parameters: {sum(p.numel() for p in model.parameters())/1e6:.2f}M')
 

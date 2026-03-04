@@ -29,8 +29,8 @@ from torch import optim, nn
 from torch.nn.parallel import DistributedDataParallel  # DDP：多卡同步梯度
 from torch.utils.data import DataLoader, DistributedSampler  # 每卡分片数据，不重复
 from transformers import AutoTokenizer  # [SFT] SFT 需一开始就加载 tokenizer（给 SFTDataset 用），pretrain 仅在 eval_bench=1 时加载
-from model.config import SpongeBobConfig
-from model.model_spongebob_pro import SpongeBobForCausalLM
+from model.config import BottleZeroConfig
+from model.model_BottleZero_pro import BottleZeroForCausalLM
 from dataset.sft_dataset import SFTDataset  # [SFT] pretrain 用 PretrainDataset(.bin)，SFT 用 SFTDataset(jsonl + 只算 assistant loss)
 from utils import get_lr, Logger, is_main_process, init_distributed_mode, SkipBatchSampler
 
@@ -118,7 +118,7 @@ def train_epoch(epoch, loader, iters, start_step=0, swanlab=None, total_steps=No
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="SpongeBob SFT Training")
+    parser = argparse.ArgumentParser(description="BottleZero SFT Training")
     # [SFT] 以下参数默认值与 pretrain.py 不同：save_dir, save_weight, epochs, data_path, from_weight, swanlab_project
     # [SFT] 新增参数：tokenizer_path, ollama_url, ollama_model
     parser.add_argument("--save_dir", type=str, default="../out_sft/exp_1", help="模型保存目录")
@@ -141,7 +141,7 @@ if __name__ == "__main__":
     parser.add_argument('--from_weight', default='', type=str, help="基于哪个权重训练，为 none 则从头开始")
     parser.add_argument('--from_resume', default=0, type=int, choices=[0, 1], help="是否自动检测&续训（0=否，1=是）")
     parser.add_argument("--use_swanlab", type=int, default=1, choices=[0, 1], help="是否使用 swanlab（0=否，1=是）")
-    parser.add_argument("--swanlab_project", type=str, default="SpongeBob-SFT", help="swanlab 项目名")
+    parser.add_argument("--swanlab_project", type=str, default="BottleZero-SFT", help="swanlab 项目名")
     parser.add_argument("--use_compile", default=1, type=int, choices=[0, 1], help="是否使用 torch.compile 加速（0=否，1=是）")
     # [SFT] 新增：mini_bench 评测参数（使用 DeepSeek API）
     parser.add_argument("--enable_eval", type=int, default=0, choices=[0, 1], help="是否启用评估（0=关闭，1=开启）")
@@ -155,7 +155,7 @@ if __name__ == "__main__":
     if dist.is_initialized(): args.device = f"cuda:{local_rank}"
 
     # ========== 2. 配置目录、模型参数、检查 ckp ==========
-    lm_config = SpongeBobConfig(hidden_size=args.hidden_size, num_hidden_layers=args.num_hidden_layers)
+    lm_config = BottleZeroConfig(hidden_size=args.hidden_size, num_hidden_layers=args.num_hidden_layers)
 
     # 与 pretrain 一致：用 run_name 做子目录
     run_name = f"h{args.hidden_size}_l{args.num_hidden_layers}_bs{args.batch_size}_lr{args.learning_rate}"
@@ -202,11 +202,11 @@ if __name__ == "__main__":
     # [SFT] 用 load_state_dict 加载 .pth 权重文件，pretrain 用 from_pretrained 加载模型目录
     if args.from_weight != 'none' and os.path.exists(args.from_weight):
         Logger(f'Loading model from {args.from_weight}')
-        model = SpongeBobForCausalLM(lm_config)
+        model = BottleZeroForCausalLM(lm_config)
         model.load_state_dict(torch.load(args.from_weight, map_location='cpu'), strict=False)
     else:
         Logger(f'Creating new model: hidden_size={args.hidden_size}, num_layers={args.num_hidden_layers}')
-        model = SpongeBobForCausalLM(lm_config)
+        model = BottleZeroForCausalLM(lm_config)
 
     model = model.to(args.device)
     Logger(f'Model parameters: {sum(p.numel() for p in model.parameters())/1e6:.2f}M')

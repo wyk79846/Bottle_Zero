@@ -1,5 +1,5 @@
 """
-SpongeBob SFT 数据集
+BottleZero SFT 数据集
 支持多轮对话，只计算 assistant 部分的 loss
 """
 import json

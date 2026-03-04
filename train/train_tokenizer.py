@@ -13,8 +13,8 @@ os.environ['RAYON_NUM_THREADS'] = str(NUM_THREADS)
 os.environ['TOKENIZERS_PARALLELISM'] = 'true'
 
 # 配置
-DATA_PATH = '/apdcephfs_qy4/share_302593112/huaibingxie/SpongeBob/data/pretrain_data/merged_pretrain_data_zh_en_only_v2.jsonl'
-TOKENIZER_DIR = '/apdcephfs_qy4/share_302593112/huaibingxie/SpongeBob/tokenizer_15k/'
+DATA_PATH = '/apdcephfs_qy4/share_302593112/huaibingxie/BottleZero/data/pretrain_data/merged_pretrain_data_zh_en_only_v2.jsonl'
+TOKENIZER_DIR = '/apdcephfs_qy4/share_302593112/huaibingxie/BottleZero/tokenizer_15k/'
 VOCAB_SIZE = 15000
 
 # 特殊tokens（15个）

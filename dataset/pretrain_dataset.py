@@ -1,5 +1,5 @@
 """
-SpongeBob 预训练数据集
+BottleZero 预训练数据集
 加载预处理好的二进制数据
 """
 import os

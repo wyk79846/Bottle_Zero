@@ -24,8 +24,8 @@ from torch import optim
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.utils.data import DataLoader, DistributedSampler
 from transformers import AutoTokenizer
-from model.config import SpongeBobConfig
-from model.model_spongebob_pro import SpongeBobForCausalLM
+from model.config import BottleZeroConfig
+from model.model_BottleZero_pro import BottleZeroForCausalLM
 from dataset.grpo_dataset import GRPODataset
 from train.utils import Logger, is_main_process, init_distributed_mode, SkipBatchSampler
 
@@ -384,7 +384,7 @@ def train_epoch(epoch, loader, iters, model, ref_model, optimizer, tokenizer, au
 # ==================== 主程序 ====================
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="SpongeBob GRPO Training")
+    parser = argparse.ArgumentParser(description="BottleZero GRPO Training")
     
     # 训练参数
     parser.add_argument("--save_dir", type=str, default="../out_grpo/exp_1")
@@ -421,7 +421,7 @@ if __name__ == "__main__":
     # 控制
     parser.add_argument('--from_resume', default=0, type=int, choices=[0, 1])
     parser.add_argument("--use_swanlab", type=int, default=1, choices=[0, 1])
-    parser.add_argument("--swanlab_project", type=str, default="SpongeBob-GRPO")
+    parser.add_argument("--swanlab_project", type=str, default="BottleZero-GRPO")
     parser.add_argument("--use_compile", default=1, type=int, choices=[0, 1])
     
     args = parser.parse_args()
@@ -432,7 +432,7 @@ if __name__ == "__main__":
         args.device = f"cuda:{local_rank}"
     
     # 配置
-    lm_config = SpongeBobConfig(hidden_size=args.hidden_size, num_hidden_layers=args.num_hidden_layers,
+    lm_config = BottleZeroConfig(hidden_size=args.hidden_size, num_hidden_layers=args.num_hidden_layers,
                                 max_position_embeddings=args.max_seq_len + args.max_gen_len)
     run_name = f"h{args.hidden_size}_l{args.num_hidden_layers}_bs{args.batch_size}_lr{args.learning_rate}"
     full_save_dir = os.path.join(args.save_dir, run_name)
@@ -469,7 +469,7 @@ if __name__ == "__main__":
         tokenizer.pad_token = tokenizer.unk_token if tokenizer.unk_token else '[PAD]'
     
     def load_model(trainable=True):
-        m = SpongeBobForCausalLM(lm_config)
+        m = BottleZeroForCausalLM(lm_config)
         if os.path.exists(args.sft_model_path):
             m.load_state_dict(torch.load(args.sft_model_path, map_location='cpu'), strict=False)
         m = m.to(args.device)

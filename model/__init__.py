@@ -1,18 +1,18 @@
-from .config import SpongeBobConfig
-from .model_spongebob_pro import (
-    SpongeBobModel,
-    SpongeBobForCausalLM,
-    SpongeBobBlock,
+from .config import BottleZeroConfig
+from .model_BottleZero_pro import (
+    BottleZeroModel,
+    BottleZeroForCausalLM,
+    BottleZeroBlock,
     Attention,
     FeedForward,
     RMSNorm
 )
 
 __all__ = [
-    "SpongeBobConfig",
-    "SpongeBobModel",
-    "SpongeBobForCausalLM",
-    "SpongeBobBlock",
+    "BottleZeroConfig",
+    "BottleZeroModel",
+    "BottleZeroForCausalLM",
+    "BottleZeroBlock",
     "Attention",
     "FeedForward",
     "RMSNorm"
